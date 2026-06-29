@@ -12,25 +12,32 @@ class ContactClassifier
 
     response = client.messages.create(
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 10,
+      max_tokens: 20,
       messages: [{ role: "user", content: prompt }]
     )
 
-    category = response.content.first.text.to_s.strip.downcase
-    CATEGORIES.include?(category) ? category : "other"
+    parse(response.content.first.text.to_s.strip.downcase)
   rescue => e
     Rails.logger.error("ContactClassifier error: #{e.message}")
-    "other"
+    { category: "other", urgent: false }
   end
 
   private
 
+  def parse(text)
+    parts    = text.split
+    category = CATEGORIES.include?(parts[0]) ? parts[0] : "other"
+    urgent   = parts[1] == "urgent"
+    { category: category, urgent: urgent }
+  end
+
   def prompt
     <<~PROMPT
-      Classify this contact form submission into exactly one of these categories:
-      sales, support, partnership, spam, other
+      Classify this contact form submission. Respond with exactly two words:
+      1. Category: sales, support, partnership, spam, or other
+      2. Urgency: urgent or normal
 
-      Respond with only the single category word, nothing else.
+      Example responses: "sales urgent" or "support normal"
 
       Name: #{@name}
       Email: #{@email}

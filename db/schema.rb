@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_18_172216) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_29_161728) do
   create_table "contact_submissions", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -19,5 +19,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_18_172216) do
     t.string "ip_address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "urgent", default: false, null: false
   end
 end

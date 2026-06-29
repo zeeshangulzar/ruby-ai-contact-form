@@ -11,17 +11,18 @@ class ContactsController < ApplicationController
       render :new, status: :unprocessable_entity and return
     end
 
-    category = ContactClassifier.new(
+    result = ContactClassifier.new(
       name:    @submission.name,
       email:   @submission.email,
       message: @submission.message
     ).classify
 
-    @submission.category = category
+    @submission.category = result[:category]
+    @submission.urgent   = result[:urgent]
     @submission.save!
 
-    unless category == "spam"
-      team_email = ContactRouter.team_email_for(category)
+    unless result[:category] == "spam"
+      team_email = ContactRouter.team_email_for(result[:category])
       DeliverMailJob.perform_later("ContactMailer", "team_notification", @submission.id, team_email)
       DeliverMailJob.perform_later("ContactMailer", "auto_reply", @submission.id)
     end

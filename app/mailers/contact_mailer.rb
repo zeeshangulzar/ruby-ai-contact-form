@@ -2,10 +2,13 @@ class ContactMailer < ApplicationMailer
   def team_notification(submission, team_email)
     @submission = submission
 
+    prefix = submission.urgent? ? "[URGENT]" : nil
+    subject = ["[#{submission.category.capitalize}]", prefix, "New contact from #{submission.name}"].compact.join(" ")
+
     mail(
       to:      team_email,
       from:    ENV.fetch("MAILTRAP_FROM_EMAIL", "no-reply@example.com"),
-      subject: "[#{submission.category.capitalize}] New contact from #{submission.name}",
+      subject: subject,
       headers: { "X-MT-Category" => submission.category }
     )
   end

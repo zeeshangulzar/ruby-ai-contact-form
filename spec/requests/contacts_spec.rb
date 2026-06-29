@@ -19,9 +19,8 @@ RSpec.describe "Contacts", type: :request do
 
     context "with valid params" do
       before do
-        allow_any_instance_of(ContactClassifier).to receive(:classify).and_return("sales")
-        allow(ContactMailer).to receive_message_chain(:team_notification, :deliver_now)
-        allow(ContactMailer).to receive_message_chain(:auto_reply, :deliver_now)
+        allow_any_instance_of(ContactClassifier).to receive(:classify).and_return({ category: "sales", urgent: false })
+        allow(DeliverMailJob).to receive(:perform_later)
       end
 
       it "saves the submission and redirects" do
@@ -33,11 +32,17 @@ RSpec.describe "Contacts", type: :request do
         post contact_path, params: valid_params
         expect(ContactSubmission.last.category).to eq("sales")
       end
+
+      it "sets the urgency from the classifier" do
+        allow_any_instance_of(ContactClassifier).to receive(:classify).and_return({ category: "sales", urgent: true })
+        post contact_path, params: valid_params
+        expect(ContactSubmission.last.urgent).to be(true)
+      end
     end
 
     context "with spam classification" do
       before do
-        allow_any_instance_of(ContactClassifier).to receive(:classify).and_return("spam")
+        allow_any_instance_of(ContactClassifier).to receive(:classify).and_return({ category: "spam", urgent: false })
       end
 
       it "saves the submission but does not send emails" do

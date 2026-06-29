@@ -2,12 +2,13 @@
 
 A Ruby on Rails contact form that uses **AI classification** to route submissions to the right team and send auto-replies — all via [Mailtrap](https://mailtrap.io).
 
-Every submission is classified into a category (`sales`, `support`, `partnership`, `spam`, or `other`) using the Anthropic API. Spam submissions are logged silently. All others trigger a team notification routed to the matching inbox, plus an auto-reply to the submitter. Emails are tagged with a `X-MT-Category` header for Mailtrap analytics.
+Every submission is classified into a category (`sales`, `support`, `partnership`, `spam`, or `other`) and an urgency flag (`urgent` or `normal`) using the Anthropic API. Spam submissions are logged silently. All others trigger a team notification routed to the matching inbox, plus an auto-reply to the submitter. Emails are tagged with a `X-MT-Category` header for Mailtrap analytics.
 
 ## Features
 
 - Contact form at `/contact` with input validation
-- AI classifies each submission into: `sales`, `support`, `partnership`, `spam`, or `other`
+- AI classifies each submission into: `sales`, `support`, `partnership`, `spam`, or `other`, with urgency detection (`urgent` / `normal`)
+- Urgent submissions are flagged with `[URGENT]` in the team notification subject line
 - Team notification email routed to the correct inbox based on category
 - `X-MT-Category` header set on all outgoing emails for Mailtrap dashboard analytics
 - Auto-reply sent to every non-spam submitter
@@ -24,14 +25,14 @@ POST /contact
 ContactSubmission (validate & save)
       │
       ▼
-ContactClassifier ──► Anthropic API ──► category
+ContactClassifier ──► Anthropic API ──► { category, urgent }
       │
       ├── spam? ──► log only, no emails
       │
       └── other ──► ContactRouter ──► team_email
                           │
-                          ├── ContactMailer#team_notification ──► Mailtrap (X-MT-Category header)
-                          └── ContactMailer#auto_reply ──────────► Mailtrap (X-MT-Category header)
+                          ├── DeliverMailJob ──► ContactMailer#team_notification ──► Mailtrap ([URGENT] subject, X-MT-Category)
+                          └── DeliverMailJob ──► ContactMailer#auto_reply ──────────► Mailtrap (X-MT-Category header)
 ```
 
 ## Requirements
@@ -77,14 +78,16 @@ Open `http://localhost:3000` in your browser.
 1. User submits the form at `/contact`
 2. Submission is validated and saved to the database with the requester's IP address
 3. `ContactClassifier` sends the name, email, and message to the Anthropic API
-4. The API responds with a single category word — `sales`, `support`, `partnership`, `spam`, or `other`
-5. If classified as **spam** — the submission is stored and processing stops (no emails sent)
-6. For all other categories:
+4. The API responds with two words — a category (`sales`, `support`, `partnership`, `spam`, or `other`) and urgency (`urgent` or `normal`)
+5. Both `category` and `urgent` are saved on the submission record
+6. If classified as **spam** — the submission is stored and processing stops (no emails sent)
+7. For all other categories:
    - `ContactRouter` maps the category to the configured team email address
-   - `ContactMailer#team_notification` sends a formatted notification to the team inbox
-   - `ContactMailer#auto_reply` sends a confirmation to the submitter
+   - `DeliverMailJob` enqueues `ContactMailer#team_notification` — subject is prefixed with `[URGENT]` when flagged
+   - `DeliverMailJob` enqueues `ContactMailer#auto_reply` — sends a confirmation to the submitter
+   - Both jobs retry up to 100 times on SMTP errors; each runs independently so one failure doesn't block the other
    - Both emails include the `X-MT-Category` header for Mailtrap dashboard grouping
-7. If the Anthropic API is unavailable — the classifier catches the error and returns `"other"` so emails still flow
+8. If the Anthropic API is unavailable — the classifier catches the error and returns `{ category: "other", urgent: false }` so emails still flow
 
 ## Key Files
 
@@ -94,6 +97,7 @@ Open `http://localhost:3000` in your browser.
 | `app/services/contact_classifier.rb` | Calls the Anthropic API and returns a category string |
 | `app/services/contact_router.rb` | Maps category to team email address via env vars |
 | `app/mailers/contact_mailer.rb` | Sends team notification and auto-reply with `X-MT-Category` header |
+| `app/jobs/deliver_mail_job.rb` | Background job that delivers email with retry on SMTP errors |
 | `app/models/contact_submission.rb` | Validates and persists every submission |
 | `app/views/contact_mailer/` | HTML and plain-text email templates |
 | `config/environments/development.rb` | Mailtrap sandbox SMTP configuration |

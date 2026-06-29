@@ -121,9 +121,12 @@ config.action_mailer.smtp_settings = {
 The `X-MT-Category` header groups emails by category in the Mailtrap dashboard:
 
 ```ruby
+prefix  = submission.urgent? ? "[URGENT]" : nil
+subject = ["[#{submission.category.capitalize}]", prefix, "New contact from #{submission.name}"].compact.join(" ")
+
 mail(
   to:      team_email,
-  subject: "[#{category}] New contact from #{name}",
+  subject: subject,
   headers: { "X-MT-Category" => submission.category }
 )
 ```
@@ -139,9 +142,10 @@ Tests cover:
 - Model validations (presence, email format, message length, category inclusion)
 - Form renders correctly
 - Valid submission is saved and redirects
-- Classifier result is stored on the submission record
+- Classifier result (category and urgency) is stored on the submission record
 - Spam submissions skip email delivery
 - Invalid submissions re-render the form with errors
+- Background job enqueues both team notification and auto-reply
 
 ## License
 

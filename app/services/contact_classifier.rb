@@ -8,17 +8,15 @@ class ContactClassifier
   end
 
   def classify
-    client = Anthropic::Client.new(access_token: ENV["ANTHROPIC_API_KEY"])
+    client = Anthropic::Client.new(api_key: ENV["ANTHROPIC_API_KEY"])
 
-    response = client.messages(
-      parameters: {
-        model: "claude-3-5-haiku-20241022",
-        max_tokens: 10,
-        messages: [{ role: "user", content: prompt }]
-      }
+    response = client.messages.create(
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 10,
+      messages: [{ role: "user", content: prompt }]
     )
 
-    category = response.dig("content", 0, "text").to_s.strip.downcase
+    category = response.content.first.text.to_s.strip.downcase
     CATEGORIES.include?(category) ? category : "other"
   rescue => e
     Rails.logger.error("ContactClassifier error: #{e.message}")

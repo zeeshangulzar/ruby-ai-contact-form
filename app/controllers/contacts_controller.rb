@@ -22,8 +22,8 @@ class ContactsController < ApplicationController
 
     unless category == "spam"
       team_email = ContactRouter.team_email_for(category)
-      ContactMailer.team_notification(@submission, team_email).deliver_now
-      ContactMailer.auto_reply(@submission).deliver_now
+      DeliverMailJob.perform_later("ContactMailer", "team_notification", @submission.id, team_email)
+      DeliverMailJob.perform_later("ContactMailer", "auto_reply", @submission.id)
     end
 
     redirect_to contact_path, notice: "Your message has been sent. We'll be in touch soon!"

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Ruby Ai Contact Form" %></title>
+    <title><%= content_for(:title) || "Contact Us" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
@@ -17,7 +17,15 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body style="font-family:sans-serif;background:#f9fafb;margin:0;padding:2rem;">
+    <div style="max-width:640px;margin:0 auto;">
+      <% if notice.present? %>
+        <p style="color:#166534;padding:0.75rem 1rem;background:#dcfce7;border:1px solid #bbf7d0;border-radius:6px;margin-bottom:1rem;"><%= notice %></p>
+      <% end %>
+      <% if alert.present? %>
+        <p style="color:#991b1b;padding:0.75rem 1rem;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;margin-bottom:1rem;"><%= alert %></p>
+      <% end %>
+      <%= yield %>
+    </div>
   </body>
 </html>

@@ -1,0 +1,7 @@
+New contact form submission — <%= @submission.category.capitalize %>
+
+Name:    <%= @submission.name %>
+Email:   <%= @submission.email %>
+Message: <%= @submission.message %>
+
+Submitted at <%= @submission.created_at.strftime("%B %d, %Y at %H:%M UTC") %>

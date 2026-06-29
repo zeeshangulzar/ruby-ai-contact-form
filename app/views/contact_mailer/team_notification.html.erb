@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;color:#333;">
+    <h2>New contact form submission</h2>
+    <p><strong>Category:</strong> <%= @submission.category.capitalize %></p>
+    <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+      <tr><td style="padding:0.5rem;border:1px solid #ddd;font-weight:bold;width:30%;">Name</td><td style="padding:0.5rem;border:1px solid #ddd;"><%= @submission.name %></td></tr>
+      <tr><td style="padding:0.5rem;border:1px solid #ddd;font-weight:bold;">Email</td><td style="padding:0.5rem;border:1px solid #ddd;"><%= @submission.email %></td></tr>
+      <tr><td style="padding:0.5rem;border:1px solid #ddd;font-weight:bold;">Message</td><td style="padding:0.5rem;border:1px solid #ddd;"><%= @submission.message %></td></tr>
+    </table>
+    <p style="color:#666;font-size:0.875rem;">Submitted at <%= @submission.created_at.strftime("%B %d, %Y at %H:%M UTC") %></p>
+  </body>
+</html>

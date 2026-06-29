@@ -1,0 +1,29 @@
+<h1 style="margin-bottom:0.25rem;">Contact Us</h1>
+<p style="color:#6b7280;margin-top:0;margin-bottom:2rem;">We'll get back to you as soon as possible.</p>
+
+<%= form_with model: @submission, url: contact_path, local: true do |f| %>
+  <% if @submission.errors.any? %>
+    <div style="color:#991b1b;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;padding:0.75rem 1rem;margin-bottom:1rem;">
+      <% @submission.errors.full_messages.each do |msg| %>
+        <p style="margin:0.25rem 0;"><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom:1rem;">
+    <%= f.label :name, style: "display:block;font-weight:600;margin-bottom:0.25rem;" %>
+    <%= f.text_field :name, style: "width:100%;padding:0.5rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;box-sizing:border-box;", placeholder: "Your name" %>
+  </div>
+
+  <div style="margin-bottom:1rem;">
+    <%= f.label :email, style: "display:block;font-weight:600;margin-bottom:0.25rem;" %>
+    <%= f.email_field :email, style: "width:100%;padding:0.5rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;box-sizing:border-box;", placeholder: "you@example.com" %>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <%= f.label :message, style: "display:block;font-weight:600;margin-bottom:0.25rem;" %>
+    <%= f.text_area :message, rows: 6, style: "width:100%;padding:0.5rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;box-sizing:border-box;resize:vertical;", placeholder: "How can we help?" %>
+  </div>
+
+  <%= f.submit "Send message", style: "background:#4f46e5;color:#fff;padding:0.65rem 1.5rem;border:none;border-radius:6px;font-size:1rem;cursor:pointer;" %>
+<% end %>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;color:#333;">
+    <h2>Thanks for reaching out, <%= @submission.name %>!</h2>
+    <p>We received your message and will get back to you shortly.</p>
+    <blockquote style="border-left:4px solid #e2e8f0;padding:0.5rem 1rem;color:#555;margin:1.5rem 0;">
+      <%= @submission.message %>
+    </blockquote>
+    <p>In the meantime, feel free to reply to this email if you have anything to add.</p>
+    <p style="color:#666;font-size:0.875rem;margin-top:2rem;">This is an automated confirmation — a team member will follow up with you soon.</p>
+  </body>
+</html>

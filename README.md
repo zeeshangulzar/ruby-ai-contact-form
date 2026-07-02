@@ -52,7 +52,7 @@ cd ruby-ai-contact-form
 bundle install
 
 cp .env.example .env
-# Edit .env — add your Mailtrap SMTP credentials and Anthropic API key
+# Edit .env — add your Mailtrap API token, Anthropic API key, and team emails
 
 rails db:create db:migrate
 rails server
@@ -60,13 +60,23 @@ rails server
 
 Open `http://localhost:3000` in your browser.
 
+### Mailtrap setup
+
+This app uses **Mailtrap Email Sending** (real delivery, not the Sandbox testing product):
+
+1. Sign in to [Mailtrap](https://mailtrap.io) → **Email Sending** → **Sending Domains**
+2. Either add and verify your own domain, or use the free **`demomailtrap.co`** demo domain that is pre-created for every account
+   - The demo domain can only deliver to your Mailtrap account email address — great for local testing, not for reaching real users
+3. Go to **Settings** → **API Tokens** → **Add API Token** and give it the **Admin** permission on your sending domain
+4. Copy the token into `.env` as `MAILTRAP_API_TOKEN`
+5. Set `MAILTRAP_FROM_EMAIL` to a sender on your verified domain (e.g. `hello@demomailtrap.co`)
+
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `MAILTRAP_SMTP_USER` | SMTP username — Sandboxes → My Sandbox → Integrations → Ruby on Rails |
-| `MAILTRAP_SMTP_PASS` | SMTP password — same location as above |
-| `MAILTRAP_FROM_EMAIL` | Sender address used in all outgoing emails |
+| `MAILTRAP_API_TOKEN` | Mailtrap API token with sending permission on your domain — also used as the SMTP password |
+| `MAILTRAP_FROM_EMAIL` | Verified sender address (e.g. `hello@demomailtrap.co`) |
 | `ANTHROPIC_API_KEY` | API key from [console.anthropic.com](https://console.anthropic.com) → API Keys |
 | `TEAM_EMAIL_SALES` | Inbox for sales enquiries |
 | `TEAM_EMAIL_SUPPORT` | Inbox for support requests |
@@ -100,21 +110,32 @@ Open `http://localhost:3000` in your browser.
 | `app/jobs/deliver_mail_job.rb` | Background job that delivers email with retry on SMTP errors |
 | `app/models/contact_submission.rb` | Validates and persists every submission |
 | `app/views/contact_mailer/` | HTML and plain-text email templates |
-| `config/environments/development.rb` | Mailtrap sandbox SMTP configuration |
+| `config/environments/development.rb` | Mailtrap Email Sending SMTP configuration |
+| `config/initializers/mailtrap.rb` | Activates the Mailtrap Sending API adapter in production |
 
 ## Mailtrap Integration
 
-Development uses Mailtrap Sandbox via SMTP so emails are caught without being delivered:
+**Development** uses Mailtrap Email Sending over live SMTP — emails are delivered through your verified sending domain:
 
 ```ruby
 # config/environments/development.rb
 config.action_mailer.delivery_method = :smtp
 config.action_mailer.smtp_settings = {
-  user_name: ENV["MAILTRAP_SMTP_USER"],
-  password:  ENV["MAILTRAP_SMTP_PASS"],
-  address:   "sandbox.smtp.mailtrap.io",
+  user_name: "api",
+  password:  ENV["MAILTRAP_API_TOKEN"],
+  address:   "live.smtp.mailtrap.io",
   port:      2525,
   authentication: :login
+}
+```
+
+**Production** uses the Mailtrap Sending API via the official [`mailtrap`](https://github.com/railsware/mailtrap-ruby) gem:
+
+```ruby
+# config/initializers/mailtrap.rb
+Rails.application.config.action_mailer.delivery_method = :mailtrap
+Rails.application.config.action_mailer.mailtrap_settings = {
+  api_key: ENV["MAILTRAP_API_TOKEN"]
 }
 ```
 

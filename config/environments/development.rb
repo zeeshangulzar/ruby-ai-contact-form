@@ -36,11 +36,12 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Mailtrap Email Sending via SMTP — real delivery through your verified sending domain
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    user_name: ENV["MAILTRAP_SMTP_USER"],
-    password:  ENV["MAILTRAP_SMTP_PASS"],
-    address:   "sandbox.smtp.mailtrap.io",
+    user_name: "api",
+    password:  ENV["MAILTRAP_API_TOKEN"],
+    address:   "live.smtp.mailtrap.io",
     port:      2525,
     authentication: :login
   }

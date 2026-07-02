@@ -62,7 +62,7 @@ Open `http://localhost:3000` in your browser.
 
 ### Mailtrap setup
 
-This app uses **Mailtrap Email API/SMTP** for real email delivery. If you'd rather inspect emails without actually delivering them during development, you can point ActionMailer at [Mailtrap Email Sandbox](https://mailtrap.io/email-sandbox/) instead — but the default setup below uses the live sending path.
+This app uses **Mailtrap Email API/SMTP** for real email delivery.
 
 1. Sign in to [Mailtrap](https://mailtrap.io) → **Domains**
 2. Either add and verify your own domain, or use the free **`demomailtrap.co`** demo domain that is pre-created for every account

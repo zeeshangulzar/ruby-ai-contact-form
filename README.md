@@ -62,9 +62,9 @@ Open `http://localhost:3000` in your browser.
 
 ### Mailtrap setup
 
-This app uses **Mailtrap Email Sending** (real delivery, not the Sandbox testing product):
+This app uses **Mailtrap Email API/SMTP** for real email delivery. If you'd rather inspect emails without actually delivering them during development, you can point ActionMailer at [Mailtrap Email Sandbox](https://mailtrap.io/email-sandbox/) instead — but the default setup below uses the live sending path.
 
-1. Sign in to [Mailtrap](https://mailtrap.io) → **Email Sending** → **Sending Domains**
+1. Sign in to [Mailtrap](https://mailtrap.io) → **Domains**
 2. Either add and verify your own domain, or use the free **`demomailtrap.co`** demo domain that is pre-created for every account
    - The demo domain can only deliver to your Mailtrap account email address — great for local testing, not for reaching real users
 3. Go to **Settings** → **API Tokens** → **Add API Token** and give it the **Admin** permission on your sending domain
@@ -110,12 +110,12 @@ This app uses **Mailtrap Email Sending** (real delivery, not the Sandbox testing
 | `app/jobs/deliver_mail_job.rb` | Background job that delivers email with retry on SMTP errors |
 | `app/models/contact_submission.rb` | Validates and persists every submission |
 | `app/views/contact_mailer/` | HTML and plain-text email templates |
-| `config/environments/development.rb` | Mailtrap Email Sending SMTP configuration |
-| `config/initializers/mailtrap.rb` | Activates the Mailtrap Sending API adapter in production |
+| `config/environments/development.rb` | Mailtrap SMTP configuration |
+| `config/initializers/mailtrap.rb` | Activates the Mailtrap Email API adapter in production |
 
 ## Mailtrap Integration
 
-**Development** uses Mailtrap Email Sending over live SMTP — emails are delivered through your verified sending domain:
+**Development** uses Mailtrap SMTP — emails are delivered through your verified sending domain via `live.smtp.mailtrap.io`:
 
 ```ruby
 # config/environments/development.rb
@@ -129,7 +129,7 @@ config.action_mailer.smtp_settings = {
 }
 ```
 
-**Production** uses the Mailtrap Sending API via the official [`mailtrap`](https://github.com/railsware/mailtrap-ruby) gem:
+**Production** uses the Mailtrap Email API via the official [`mailtrap`](https://github.com/railsware/mailtrap-ruby) gem:
 
 ```ruby
 # config/initializers/mailtrap.rb

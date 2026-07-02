@@ -62,8 +62,6 @@ Open `http://localhost:3000` in your browser.
 
 ### Mailtrap setup
 
-This app uses **Mailtrap Email API/SMTP** for real email delivery.
-
 1. Sign in to [Mailtrap](https://mailtrap.io) → **Domains**
 2. Either add and verify your own domain, or use the free **`demomailtrap.co`** demo domain that is pre-created for every account
    - The demo domain can only deliver to your Mailtrap account email address — great for local testing, not for reaching real users
